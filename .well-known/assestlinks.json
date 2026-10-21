@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.madebyzen.twa",
+        "sha256_cert_fingerprints": ["A6:8A:BE:BF:69:93:3C:A6:11:3C:27:CE:45:48:19:74:98:73:BD:92:98:7D:D9:86:35:DC:50:30:08:C8:C0:67"]
+      }
+    }]
