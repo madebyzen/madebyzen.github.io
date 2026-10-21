@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SnapPDF - Image and PDF Tool</title>
+  <meta name="description" content="Convert, compress, merge, split and resize images and PDFs. Fast, private and works offline.">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6366f1">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+</head>
+<body>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#6366f1"/>
+        <stop offset="1" stop-color="#ec4899"/>
+      </linearGradient>
+    </defs>
+    <symbol id="logo-mark" viewBox="0 0 64 64">
+      <rect width="64" height="64" rx="16" fill="url(#lg)"/>
+      <path d="M19 12h19l9 9v31a2 2 0 0 1-2 2H19a2 2 0 0 1-2-2V14a2 2 0 0 1 2-2z" fill="#fff"/>
+      <path d="M38 12v7a2 2 0 0 0 2 2h7z" fill="#c7c9f9"/>
+      <circle cx="26" cy="29" r="3" fill="#ec4899"/>
+      <path d="M17 52l10-14 6 8 5-5 9 11z" fill="#6366f1"/>
+    </symbol>
+  </svg>
+
+  <div class="splash" id="splash">
+    <svg class="logo big-logo" aria-hidden="true"><use href="#logo-mark"/></svg>
+    <h2>Snap<span>PDF</span></h2>
+    <p>Made by Nipan</p>
+  </div>
+
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+
+  <div class="wrap">
+
+    <header class="top">
+      <div class="brand">
+        <svg class="logo" aria-hidden="true"><use href="#logo-mark"/></svg>
+        <div class="brand-text">
+          <h1>Snap<span>PDF</span></h1>
+          <p>Convert. Merge. Split. Compress.</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn hidden" id="installBtn" type="button">Install</button>
+        <button class="icon-btn" id="themeBtn" type="button">Theme</button>
+      </div>
+    </header>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tool="img2pdf" type="button">Images to PDF</button>
+      <button class="tab" data-tool="pdf2img" type="button">PDF to Images</button>
+      <button class="tab" data-tool="merge" type="button">Merge PDF</button>
+      <button class="tab" data-tool="split" type="button">Split PDF</button>
+      <button class="tab" data-tool="rotate" type="button">Rotate PDF</button>
+      <button class="tab" data-tool="stamp" type="button">Stamp</button>
+      <button class="tab" data-tool="compress" type="button">Compress</button>
+      <button class="tab" data-tool="resize" type="button">Resize</button>
+    </nav>
+
+    <p class="tip" id="tip"></p>
+
+    <main class="grid">
+
+      <section class="panel">
+        <div class="drop" id="drop">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+          <h2>Drop files here</h2>
+          <p>or choose them from your device. You can also paste with Ctrl+V.</p>
+          <div class="row center">
+            <label class="btn ghost">Choose files<input type="file" id="fileInput" multiple hidden></label>
+            <label class="btn ghost">Choose folder<input type="file" id="folderInput" webkitdirectory hidden></label>
+          </div>
+        </div>
+
+        <div class="list-head hidden" id="listHead">
+          <span id="count"></span>
+          <button class="link" id="clearBtn" type="button">Clear all</button>
+        </div>
+        <div class="files" id="files"></div>
+      </section>
+
+      <section class="panel">
+        <h3>Settings</h3>
+
+        <div class="opts" data-tool="img2pdf">
+          <label class="field">Page size
+            <select id="pageSize">
+              <option value="fit">Same as image</option>
+              <option value="a4">A4 page</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" id="separate"> One PDF for each image</label>
+        </div>
+
+        <div class="opts hidden" data-tool="pdf2img">
+          <label class="field">Quality (DPI)
+            <input type="number" id="p2iDpi" value="150" min="50" max="400">
+          </label>
+          <label class="field">Format
+            <select id="p2iFmt">
+              <option value="png">PNG</option>
+              <option value="jpg">JPG</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="opts hidden" data-tool="merge">
+          <p class="note">All PDF files in the list will join into one file. Use the arrows to set the order.</p>
+        </div>
+
+        <div class="opts hidden" data-tool="split">
+          <label class="field full">Split mode
+            <select id="splitMode">
+              <option value="each">Every page as its own file</option>
+              <option value="ranges">One file for each range</option>
+              <option value="extract">Pick pages into one file</option>
+            </select>
+          </label>
+          <label class="field full" id="rangeBox">Pages
+            <input type="text" id="splitRange" placeholder="Example: 1-3, 5, 7-9">
+            <small>Use commas to separate ranges.</small>
+          </label>
+        </div>
+
+        <div class="opts hidden" data-tool="rotate">
+          <label class="field">Turn by
+            <select id="rotAngle">
+              <option value="90">90° right</option>
+              <option value="180">180°</option>
+              <option value="270">90° left</option>
+            </select>
+          </label>
+          <label class="field">Pages
+            <input type="text" id="rotRange" placeholder="All pages">
+          </label>
+        </div>
+
+        <div class="opts hidden" data-tool="stamp">
+          <label class="field full">Watermark text
+            <input type="text" id="wmText" placeholder="Example: CONFIDENTIAL">
+          </label>
+          <label class="field">Size
+            <input type="number" id="wmSize" value="60" min="10" max="200">
+          </label>
+          <label class="field">Strength: <b id="wmOpVal">25</b>%
+            <input type="range" id="wmOpacity" min="5" max="100" value="25">
+          </label>
+          <label class="check"><input type="checkbox" id="pageNums"> Add page numbers</label>
+        </div>
+
+        <div class="opts hidden" data-tool="compress">
+          <label class="field full">Quality: <b id="qVal">70</b>
+            <input type="range" id="cQuality" min="10" max="95" value="70">
+          </label>
+          <label class="field">Longest side (px)
+            <input type="number" id="cMax" placeholder="optional">
+          </label>
+          <label class="field">PDF DPI
+            <input type="number" id="cDpi" value="100" min="50" max="300">
+          </label>
+        </div>
+
+        <div class="opts hidden" data-tool="resize">
+          <label class="field">Width (px)<input type="number" id="rWidth" placeholder="auto"></label>
+          <label class="field">Height (px)<input type="number" id="rHeight" placeholder="auto"></label>
+          <label class="field">Scale<input type="number" id="rScale" step="0.1" placeholder="like 0.5"></label>
+          <label class="field">Save as
+            <select id="rFmt">
+              <option value="keep">Same format</option>
+              <option value="jpg">JPG</option>
+              <option value="png">PNG</option>
+              <option value="webp">WEBP</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="opts">
+          <label class="field full">File name
+            <input type="text" id="pattern" value="combined">
+            <small>You can use {name}, {n}, {w} and {h}. You can also rename each file after it is ready.</small>
+          </label>
+          <label class="field full">ZIP folder name
+            <input type="text" id="folderName" value="output">
+          </label>
+        </div>
+
+        <button class="btn main big" id="runBtn" type="button">Start</button>
+        <div class="bar"><div id="barFill"></div></div>
+        <p class="status" id="status"></p>
+      </section>
+    </main>
+
+    <section class="panel results hidden" id="results">
+      <div class="res-head">
+        <h3>Your files</h3>
+        <button class="btn main small" id="zipBtn" type="button">Download ZIP</button>
+      </div>
+
+      <div class="share-row" id="shareRow">
+        <button class="share wa" data-app="whatsapp" type="button">WhatsApp</button>
+        <button class="share tg" data-app="telegram" type="button">Telegram</button>
+        <button class="share bt" data-app="bluetooth" type="button">Bluetooth</button>
+        <button class="share more" data-app="more" type="button">More</button>
+        <button class="share zipshare" data-app="zip" type="button">Share ZIP</button>
+      </div>
+
+      <div id="list"></div>
+    </section>
+
+    <footer class="foot">Made by <b>Nipan</b></footer>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+  <script>
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        document.getElementById("splash").classList.add("gone");
+      }, 900);
+    });
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () {});
+      });
+    }
+  </script>
+</body>
+</html>
